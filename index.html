@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <title>Cats API fetch</title>
+</head>
+<body class="bg-gray-100">
+  <div class="flex justify-center">
+    <button id="loadMore" 
+            class="text-xl text-white bg-gradient-to-r from-blue-500 to-indigo-600 
+                   py-3 px-8 rounded-full shadow-lg 
+                   hover:from-blue-600 hover:to-indigo-700 
+                   hover:scale-105 transition duration-300 ease-in-out fixed right-10 bottom-10 z-1000">
+      Load More Images
+    </button>
+  </div>
+  <div class="w-full bg-gray-100 h-auto grid grid-cols-[repeat(auto-fit,minmax(200px,1fr))] auto-rows-min gap-5 p-10 mt-20" id="box"></div>
+
+  <script>
+    let url = "https://api.thecatapi.com/v1/images/search?limit=10";
+    let btn = document.getElementById("loadMore");
+    let container = document.getElementById("box");
+    let page = 1;
+
+    // Function to fetch and display cats
+    function fetchCats(appendToTop = false) {
+      fetch(`${url}&page=${page}`)
+        .then(response => response.json())
+        .then(data => {
+          if (appendToTop) {
+            // Create temporary container for new images
+            const tempContainer = document.createElement('div');
+            tempContainer.className = 'contents';
+            
+            // Generate HTML for new images
+            data.forEach(cat => {
+              tempContainer.insertAdjacentHTML(
+                "beforeend",
+                `<img src="${cat.url}" class="w-[200px] h-[200px] rounded-lg shadow-xl cursor-pointer">`
+              );
+            });
+            
+            // Insert new images at the beginning of the container
+            container.insertBefore(tempContainer, container.firstChild);
+            
+            // Smooth scroll to top
+            window.scrollTo({
+              top: 0,
+              behavior: 'smooth'
+            });
+          } else {
+            // Initial load - append to bottom
+            data.forEach(cat => {
+              container.insertAdjacentHTML(
+                "beforeend",
+                `<img src="${cat.url}" class="w-[200px] h-[200px] rounded-lg shadow-xl cursor-pointer">`
+              );
+            });
+          }
+          
+          page++; // Increment page for next fetch
+        })
+        .catch(err => {
+          alert("Error: " + err);
+        });
+    }
+
+    // Load initial 10 images immediately
+    fetchCats(false);
+
+    // Handle button click
+    btn.addEventListener("click", () => {
+      fetchCats(true);
+    });
+  </script>
+</body>
+</html>
